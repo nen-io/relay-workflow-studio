@@ -1,0 +1,63 @@
+import type { Workflow } from "./workflow";
+export const seed: Workflow = {
+  version: 1,
+  id: "order-routing",
+  name: "Order routing",
+  nodes: [
+    {
+      id: "receive",
+      label: "Order received",
+      type: "trigger",
+      position: { x: 275, y: 36 },
+    },
+    {
+      id: "normalize",
+      label: "Normalize customer",
+      type: "transform",
+      operation: { kind: "uppercase", field: "customer" },
+      position: { x: 275, y: 184 },
+    },
+    {
+      id: "route",
+      label: "High-value order?",
+      type: "condition",
+      field: "amount",
+      comparator: "greater-than",
+      value: 200,
+      position: { x: 275, y: 332 },
+    },
+    {
+      id: "priority",
+      label: "Priority queue",
+      type: "output",
+      position: { x: 105, y: 514 },
+    },
+    {
+      id: "standard",
+      label: "Standard queue",
+      type: "output",
+      position: { x: 445, y: 514 },
+    },
+  ],
+  edges: [
+    { id: "receive-normalize", source: "receive", target: "normalize" },
+    { id: "normalize-route", source: "normalize", target: "route" },
+    {
+      id: "route-priority",
+      source: "route",
+      target: "priority",
+      branch: "true",
+    },
+    {
+      id: "route-standard",
+      source: "route",
+      target: "standard",
+      branch: "false",
+    },
+  ],
+};
+export const inputs = {
+  priority: { customer: "Alex Morgan", amount: 320, currency: "USD" },
+  standard: { customer: "Sam Rivera", amount: 85, currency: "USD" },
+  failure: { amount: 320, currency: "USD" },
+};
