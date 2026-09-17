@@ -1,6 +1,6 @@
 # Relay — Visual workflow studio
 
-Status: implementation authorized 17 September 2026. This spec plus docs/QUALITY.md is the acceptance contract. All data in this public example is synthetic. Demo must work with no login or API key.
+This document defines the behavior and acceptance criteria. All demonstration data is synthetic. The demo runs without a login or API key.
 
 ## Product and visual design
 
@@ -34,4 +34,4 @@ Explain schema, supported node operations, validation order, engine/UI separatio
 
 ## Completion gate
 
-All specified behavior and tests implemented or parent explicitly resolves a scope issue; documentation reflects real behavior; npm run check and npm run test:e2e pass; parent reviews code and actually exercises app before publication. Public demo runs from GitHub repository subpath. No cleanup before verified publication.
+Implement the behavior and acceptance tests above; document any deliberate limitation. `npm run check` and `npm run test:e2e` must pass. Independently review the code and exercise the production build before release. Verify the public demo at its GitHub repository subpath.
