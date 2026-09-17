@@ -7,9 +7,9 @@ Executed 17 September 2026 on macOS with Node 24.19.0, React 19.3.0, Vite 8.3.0,
 | Command / check                          | Result                                                                               |
 | ---------------------------------------- | ------------------------------------------------------------------------------------ |
 | `npm run typecheck`                      | Passed strict TypeScript                                                             |
-| `npm test`                               | 54 tests passed across 3 files                                                       |
+| `npm test`                               | 56 tests passed across 3 files                                                       |
 | `npm run build`                          | Passed; relative asset URLs and production CSP emitted                               |
-| `npm run check`                          | Passed typecheck, 54 tests and build                                                 |
+| `npm run check`                          | Passed typecheck, 56 tests and build                                                 |
 | `npm run test:e2e`                       | 12 Chromium journeys passed                                                          |
 | `npx prettier --check src tests`         | Passed consistent source formatting                                                  |
 | Production preview on port 4401          | Order route completed with zero captured page/console errors; production CSP present |
@@ -43,3 +43,5 @@ Unit tests live in `tests/unit`; browser tests in `tests/e2e`. `vitest.config.ts
 - The production smoke used the local built bundle with its CSP. GitHub Pages URL, CI run and clean-clone reproduction must be verified after publication.
 - Native screen-reader output, drag support and multi-tab collaboration are not claimed. There is no drag dependency; numeric positions and labelled connections are the supported editing controls.
 - Browser persistence is last-valid-draft, last-writer-wins. Incomplete graph edits, input payloads and trace history are deliberately not restored after reload.
+
+Independent review added malformed array-enum regressions for transform operations and condition comparisons. Both are rejected at import instead of being coerced to strings. All 56 domain cases and 12 browser journeys passed after the correction.

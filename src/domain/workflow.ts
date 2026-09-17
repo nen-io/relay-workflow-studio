@@ -144,7 +144,8 @@ export function validateWorkflow(value: unknown): asserts value is Workflow {
       if (
         !object(op) ||
         !field(op.field) ||
-        !["uppercase", "multiply", "assign"].includes(String(op.kind)) ||
+        typeof op.kind !== "string" ||
+        !["uppercase", "multiply", "assign"].includes(op.kind) ||
         (op.kind === "multiply" &&
           !(typeof op.factor === "number" && Number.isFinite(op.factor))) ||
         (op.kind === "assign" && !scalar(op.value))
@@ -153,7 +154,8 @@ export function validateWorkflow(value: unknown): asserts value is Workflow {
     } else if (node.type === "condition") {
       if (
         !field(node.field) ||
-        !["equals", "greater-than"].includes(String(node.comparator)) ||
+        typeof node.comparator !== "string" ||
+        !["equals", "greater-than"].includes(node.comparator) ||
         !scalar(node.value) ||
         (node.comparator === "greater-than" && typeof node.value !== "number")
       )

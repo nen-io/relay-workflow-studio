@@ -26,6 +26,16 @@ describe("bounded workflow schema and graph validation", () => {
     ).toThrow("version 1"));
   it("rejects malformed JSON", () =>
     expect(() => parseWorkflow("{")).toThrow("not valid JSON"));
+  it.each(["operation", "comparator"])(
+    "rejects array-coerced %s enums",
+    (field) => {
+      const document = JSON.parse(JSON.stringify(seed));
+      if (field === "operation")
+        document.nodes[1].operation.kind = ["uppercase"];
+      else document.nodes[2].comparator = ["equals"];
+      expect(() => parseWorkflow(JSON.stringify(document))).toThrow();
+    },
+  );
   it("rejects duplicate node IDs", () =>
     invalid((w) => {
       w.nodes[1].id = w.nodes[0].id;
