@@ -12,7 +12,7 @@ Version 1 Workflow has id, name, nodes and edges. Node types are trigger, transf
 
 ## Required behavior
 
-1. Add, edit, connect and delete nodes; connections are explicitly labelled for conditions. Delete a node removes incident edges. Drag positions may be decorative persisted layout, but connection editing must work.
+1. Add, edit, connect and delete nodes; connections are explicitly labelled for conditions. Delete a node removes incident edges. Graph positions are editable by pointer drag, arrow keys (1px; Shift 10px) and numeric controls. Pointer moves preview node/edge positions but persist only once on release. A 4px threshold separates selection from dragging. Escape, pointer cancellation, capture loss, blur, resize or graph replacement discards the transient move. Running blocks movement. Library drop accepts only the four known block types and enforces the same node/trigger limits as click-to-add. Connections remain labelled inspector controls.
 2. Validate before run and surface specific errors without changing last good result. Runs have idle/running/completed/failed/cancelled state. Capture workflow/input at start. Disable editing during run or explicitly cancel before changing fixture; never execute a mixture of versions.
 3. Deterministic pure engine returns path, input/output snapshots and failure node; UI step animation is presentation only. Missing/wrong-type field fails at its node. Untaken branches show skipped, not successful.
 4. Cancel stops future steps; resetting or changing examples invalidates pending callbacks. Provide success and failure examples.
@@ -35,3 +35,7 @@ Explain schema, supported node operations, validation order, engine/UI separatio
 ## Completion gate
 
 Implement the behavior and acceptance tests above; document any deliberate limitation. `npm run check` and `npm run test:e2e` must pass. Independently review the code and exercise the production build before release. Verify the public demo at its GitHub repository subpath.
+
+## Refinement acceptance: direct manipulation
+
+R7 browser: real mouse movement follows the pointer, updates attached edge geometry, leaves local storage untouched until release and survives reload. Scroll coordinates stay stable; the canvas grows without shrinking under an active pointer. New imports/reset reset presentation extents. A real native library drag adds one block at the release point; invalid transfer values are ignored. Check mouse release beyond the original button, Escape, pointercancel, tablet Chromium touch, keyboard increments, run locking and mobile fallback. Numeric positions stay bounded to 0–3000.

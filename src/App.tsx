@@ -15,7 +15,7 @@ import {
   Square,
   Terminal,
 } from "lucide-react";
-import { Graph } from "./components/Graph";
+import { BLOCK_MIME, Graph } from "./components/Graph";
 import { Inspector } from "./components/Inspector";
 import { RunController, type RunState } from "./domain/engine";
 import { inputs, seed } from "./domain/fixtures";
@@ -79,6 +79,7 @@ export default function App() {
   const [controller] = useState(() => new RunController(setRun));
   const [errors, setErrors] = useState<string[]>([]);
   const [list, setList] = useState(false);
+  const [canvasRevision, setCanvasRevision] = useState(0);
   const [dirty, setDirty] = useState(false);
   const [notice, setNotice] = useState("");
   const importGeneration = useRef(0);
@@ -135,6 +136,7 @@ export default function App() {
     controller.reset();
     importGeneration.current++;
     setWorkflow(structuredClone(seed));
+    setCanvasRevision((value) => value + 1);
     setInput(JSON.stringify(inputs.priority, null, 2));
     setExample("priority");
     setSelected("route");
@@ -147,12 +149,22 @@ export default function App() {
       setWarning("Local storage unavailable.");
     }
   }
-  function add(type: WorkflowNode["type"]) {
+  function add(
+    type: WorkflowNode["type"],
+    position?: WorkflowNode["position"],
+  ) {
+    if (
+      running ||
+      workflow.nodes.length >= 40 ||
+      (type === "trigger" &&
+        workflow.nodes.some((node) => node.type === "trigger"))
+    )
+      return;
     const id = crypto.randomUUID();
     const base = {
       id,
       label: `New ${type}`,
-      position: {
+      position: position ?? {
         x: 35 + (workflow.nodes.length % 3) * 230,
         y: 36 + Math.floor(workflow.nodes.length / 3) * 148,
       },
@@ -199,6 +211,7 @@ export default function App() {
       if (generation !== importGeneration.current) return;
       controller.reset();
       change(next);
+      setCanvasRevision((value) => value + 1);
       setSelected(next.nodes[0].id);
       setDirty(false);
       setNotice("Workflow imported and validated.");
@@ -297,6 +310,22 @@ export default function App() {
                       (item.type === "trigger" &&
                         workflow.nodes.some((n) => n.type === "trigger"))
                     }
+                    draggable={
+                      !running &&
+                      workflow.nodes.length < 40 &&
+                      !(
+                        item.type === "trigger" &&
+                        workflow.nodes.some((node) => node.type === "trigger")
+                      )
+                    }
+                    onDragStart={(event) => {
+                      if (event.currentTarget.disabled || running) {
+                        event.preventDefault();
+                        return;
+                      }
+                      event.dataTransfer.setData(BLOCK_MIME, item.type);
+                      event.dataTransfer.effectAllowed = "copy";
+                    }}
                     onClick={() => add(item.type)}
                     aria-label={`Add ${item.type}`}
                   >
@@ -312,7 +341,8 @@ export default function App() {
                 ))}
               </div>
               <div className="library-tip">
-                Add a block, then connect it in the inspector.
+                Click or drag a block onto the canvas, then connect it in the
+                inspector.
               </div>
               <div className="input-section">
                 <div className="panel-heading">
@@ -415,11 +445,25 @@ export default function App() {
               </div>
             </div>
             <Graph
+              key={canvasRevision}
               workflow={workflow}
               selected={selected}
               select={setSelected}
               run={run}
               list={list}
+              add={add}
+              onEditStart={() => {
+                importGeneration.current++;
+              }}
+              move={(id, position) => {
+                if (running) return;
+                change({
+                  ...workflow,
+                  nodes: workflow.nodes.map((item) =>
+                    item.id === id ? { ...item, position } : item,
+                  ),
+                });
+              }}
             />
             <div className="canvas-legend">
               <span>

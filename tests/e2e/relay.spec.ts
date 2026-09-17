@@ -164,7 +164,9 @@ test("corrupt and denied local storage recover visibly", async ({ page }) => {
     localStorage.setItem("relay.workflow.v1", "corrupt"),
   );
   await page.reload();
-  await expect(page.getByRole("status")).toContainText("could not be restored");
+  await expect(page.locator(".banner.warning")).toContainText(
+    "could not be restored",
+  );
   await page.addInitScript(() => {
     Object.defineProperty(window, "localStorage", {
       get() {
@@ -173,7 +175,7 @@ test("corrupt and denied local storage recover visibly", async ({ page }) => {
     });
   });
   await page.reload();
-  await expect(page.getByRole("status")).toContainText("unavailable");
+  await expect(page.locator(".banner.warning")).toContainText("unavailable");
   await page.getByLabel("Workflow name").fill("Still editable");
   await expect(page.getByLabel("Workflow name")).toHaveValue("Still editable");
 });

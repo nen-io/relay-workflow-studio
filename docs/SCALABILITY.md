@@ -15,7 +15,7 @@ Let V = node count, E = edge count, P = payload size and K = visited path length
 - Each visited node snapshots the payload. Cost is O(KP) time and retained space. Scalar fields avoid arbitrary graph cloning depth. A complete path cannot visit more than V nodes.
 - Current skipped-node derivation and render lookups use linear array searches, making some UI/domain work O(V² + VE). With V≤40 this is an explicit simplicity tradeoff, not an unmeasured promise of large-graph performance.
 - Native node buttons and SVG edges render O(V+E) elements. A large browser canvas can reduce readability before CPU is a bottleneck; the list view preserves access.
-- Every valid edit serializes and writes the current workflow synchronously to local storage. At the cap, synchronous storage is an interaction bottleneck to measure before increasing limits.
+- Every committed valid edit serializes and writes the current workflow synchronously to local storage. At the cap, synchronous storage is an interaction bottleneck to measure before increasing limits.
 
 No throughput, latency or memory benchmark was performed. Test durations are correctness-run observations, not capacity measurements. Hardware-dependent performance claims are intentionally absent.
 
@@ -34,3 +34,7 @@ Persist append-only execution events with a monotonic sequence per run. Consumer
 ## Consistency now
 
 Run input and workflow are cloned once at start. Edits are disabled during the run. Timer generations invalidate cancelled/reset work. Imported files are accepted only if no newer edit/run/reset has superseded their read. The local draft is last-writer-wins across tabs; there is no collaborative editing or database transaction claim. Export is the portable backup mechanism. All larger-scale designs above are proposals, clearly separate from current behavior.
+
+## Pointer rendering budget
+
+A gesture retains one pointer record and one preview position. Node/edge DOM remains bounded by the existing 40/80 caps. Transient movement updates rendering but performs no serialization, graph persistence or engine execution; release makes one committed edit. ResizeObserver tracks at most 40 buttons and updates only when their measured heights change. Presentation extents can grow only to the bounded node coordinates plus measured label space. This is an interaction design improvement, not a measured frame-rate claim.

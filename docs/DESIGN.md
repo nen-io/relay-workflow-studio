@@ -8,4 +8,8 @@ Primary journey: inspect the preselected condition, edit its threshold or the in
 
 States: empty selection explains what to select; invalid graphs show actionable issue lists; running disables every editing field; cancelled traces retain only revealed steps; unvisited nodes are labelled skipped after completion. Import and local storage failures display a warning without replacing current graph. No fabricated usage metrics appear.
 
-Below 1050px the library and inspector stack around the workbench; below 680px the graph becomes the labelled node list, preserving all editing controls. Native form controls, visible lime focus rings, readable line heights and content wrapping support keyboard and zoom. Reduced motion removes transitions and reveals execution immediately. The same state machine and snapshots apply at every size.
+Below 1220px the library and inspector stack around the workbench; below 760px the graph becomes the labelled node list, preserving all editing controls. Native form controls, visible lime focus rings, readable line heights and content wrapping support keyboard and zoom. Reduced motion removes transitions and reveals execution immediately. The same state machine and snapshots apply at every size.
+
+## Direct manipulation refinement
+
+The graph is now a scrollable plane with one CSS pixel per saved coordinate. Node buttons retain readable widths rather than shrinking as a distant node changes the view scale. Subtle grab/grabbing cursors, selected outlines, a highlighted library drop zone and a compact instruction strip explain the interaction. Edges attach to measured button boundaries, including wrapped text. Desktop palette blocks can be dropped at a chosen location; clicking remains equally available. Tablet dragging uses the same pointer path. At phone widths, ordinary scrolling and the stacked list take priority over canvas movement.

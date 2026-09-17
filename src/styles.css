@@ -482,7 +482,8 @@ main {
   border-color: #e29272;
 }
 .node.skipped {
-  opacity: 0.54;
+  background: #141b18;
+  border-color: #35473c;
 }
 .node-top {
   display: flex;
@@ -651,7 +652,7 @@ main {
 }
 .trace-index {
   font-family: ui-monospace, monospace;
-  color: #718473;
+  color: #93a58f;
   margin-right: 5px;
   font-size: 9px;
 }
@@ -1022,4 +1023,98 @@ main {
       padding: 10px 5px;
     }
   }
+}
+
+/* Direct manipulation uses a scrollable CSS-pixel plane, never a moving scale. */
+.graph {
+  overflow: auto;
+  max-height: 760px;
+  overscroll-behavior: contain;
+}
+.canvas {
+  aspect-ratio: auto;
+}
+.connections {
+  pointer-events: none;
+}
+.node {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.node.dragging {
+  cursor: grabbing;
+  z-index: 2;
+  box-shadow: 0 12px 32px #0008;
+}
+.node.locked {
+  cursor: pointer;
+}
+.drop-target {
+  outline: 2px dashed var(--lime);
+  outline-offset: -5px;
+}
+.canvas-help {
+  padding: 10px 18px;
+  font-size: 11px;
+  color: #aab8ae;
+  border-bottom: 1px solid var(--line);
+}
+.graph:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: -3px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.list-mode {
+  max-height: none;
+}
+.list-mode .canvas {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+.list-mode .node {
+  cursor: pointer;
+  touch-action: auto;
+  user-select: auto;
+}
+@media (max-width: 760px) {
+  .graph {
+    max-height: none;
+  }
+  .canvas {
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+  .node {
+    cursor: pointer;
+    touch-action: auto;
+    user-select: auto;
+  }
+  .canvas-help {
+    display: none;
+  }
+}
+
+/* Execution state is readable even for the branch that was not taken. */
+.node strong {
+  font-size: 13px;
+}
+.node-detail {
+  font-size: 11px;
+}
+.node-top {
+  font-size: 9px;
+}
+.node-status {
+  font-size: 10px;
 }

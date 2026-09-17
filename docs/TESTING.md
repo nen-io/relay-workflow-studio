@@ -10,7 +10,7 @@ Executed 17 September 2026 on macOS with Node 24.19.0, React 19.3.0, Vite 8.3.0,
 | `npm test`                               | 56 tests passed across 3 files                                                       |
 | `npm run build`                          | Passed; relative asset URLs and production CSP emitted                               |
 | `npm run check`                          | Passed typecheck, 56 tests and build                                                 |
-| `npm run test:e2e`                       | 12 Chromium journeys passed                                                          |
+| `npm run test:e2e`                       | 22 Chromium journeys passed                                                          |
 | `npx prettier --check src tests`         | Passed consistent source formatting                                                  |
 | Production preview on port 4401          | Order route completed with zero captured page/console errors; production CSP present |
 | Root audit tool (`node audit.mjs relay`) | Zero axe violations and zero page errors; no overflow at 1440/720/390/320px          |
@@ -41,7 +41,15 @@ Unit tests live in `tests/unit`; browser tests in `tests/e2e`. `vitest.config.ts
 - The text-size test doubles computed font sizes of representative semantic elements in a narrow layout; it is not a claim of exhaustive browser/OS zoom and assistive-technology certification.
 - No load/capacity benchmark, fuzz campaign or penetration test was performed. Security tests target specified threat cases.
 - The production smoke used the local built bundle with its CSP. GitHub Pages URL, CI run and clean-clone reproduction must be verified after publication.
-- Native screen-reader output, drag support and multi-tab collaboration are not claimed. There is no drag dependency; numeric positions and labelled connections are the supported editing controls.
+- Native screen-reader output and multi-tab collaboration are not claimed. Chromium mouse and emulated tablet touch dragging are tested; physical device behavior remains unverified. Numeric positions and labelled connections remain supported.
 - Browser persistence is last-valid-draft, last-writer-wins. Incomplete graph edits, input payloads and trace history are deliberately not restored after reload.
 
-Independent review added malformed array-enum regressions for transform operations and condition comparisons. Both are rejected at import instead of being coerced to strings. All 56 domain cases and 12 browser journeys passed after the correction.
+Independent review added malformed array-enum regressions for transform operations and condition comparisons. Both are rejected at import instead of being coerced to strings. All 56 domain cases and 22 browser journeys passed after the correction.
+
+## Refinement regression evidence
+
+The initial browser repro moved the mouse by 100px horizontally and 55px vertically but observed a node delta of 0/0. `canvas.spec.ts` now covers pointer-following, live edge movement, no preview storage writes, persistence on release/reload, clicks, Escape, browser cancellation, captured movement outside the original node, scroll stability, keyboard movement, exact native library-drop placement, invalid drop values, run locking, phone list behavior and CDP tablet touch end/cancel. A second regression exposed canvas shrinking while scrolling; retaining the canvas extent fixes the unexpected coordinate jump. Existing execution/import/security journeys remain in the same suite.
+
+Independent review also imported node IDs named `__proto__`, `constructor` and `toString`. Measured heights now use a Map; three browser regressions require finite SVG paths and zero console/page errors for these valid IDs. Resize before pointerup is fenced even if the browser has not delivered its queued resize event.
+
+The independent populated production scan found low contrast in dimmed skipped-node status and trace step indices. Skipped state now uses a distinct opaque surface and explicit status, while essential node labels and details are larger. The follow-up production scan is recorded with release evidence.

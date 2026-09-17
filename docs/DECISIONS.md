@@ -59,3 +59,15 @@
 **Consequences.** Easy review and reproducibility; no claims of authentication, durable jobs, multi-tenancy or server security. The static host owns TLS and headers such as `frame-ancestors`.
 
 **Revisit when.** Demonstrating real external effects becomes necessary. Keep the current no-key demo as an isolated preview and design the authenticated service separately.
+
+## ADR 006 — A stable pixel plane and transient pointer gestures
+
+**Problem.** The first studio looked draggable but exposed only position fields. Its percentage-based fitted canvas also changed scale when positions changed, which would move the coordinate system during a gesture.
+
+**Decision.** Keep positions in CSS pixels, allow canvas scrolling, and retain the largest displayed extent until graph import/reset. Pointer capture preserves movement after leaving a button. A ref owns pointer identity, original grab offset and latest coordinates; React state renders only the current preview. Release commits one layout edit through the existing persistence boundary. Cancel paths discard preview state. Edges use observed button heights instead of a guessed bottom anchor. Existing schema limits remain authoritative.
+
+**Alternatives.** A graph framework provides zoom/pan and connector dragging, but adds a larger interaction model and dependency for a 40-node demo. Percentage fitting is compact but destabilizes direct manipulation. This bounded native implementation supports current behavior with explicit keyboard and numeric alternatives.
+
+**Consequences.** No automatic layout, zoom or drag-to-connect is claimed. Canvas extents may retain empty space after moving inward; reset/import rebuilds them. Large graphs require scrolling. Before raising node limits, profile pointer rendering and introduce indexed edge lookup or viewport culling if needed.
+
+**References.** [MDN Pointer Events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events) explains pointer identity/capture/cancel and touch-action; [React useRef](https://react.dev/reference/react/useRef) informs transient gesture storage. Consulted 17 September 2026.

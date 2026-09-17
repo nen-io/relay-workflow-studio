@@ -37,3 +37,9 @@ A future real automation service would need authenticated identities, per-tenant
 ## Reporting
 
 Use the repository's private vulnerability reporting feature if enabled. Otherwise contact the repository owner through their public GitHub profile to arrange a private channel; do not disclose exploit details or sensitive data in public issues. No contact address is invented by this example. Include affected revision, reproduction steps and expected/actual behavior with synthetic data.
+
+## Drag/drop input
+
+A drop is untrusted data, even with the custom MIME type. Only exact trigger/transform/condition/output strings are accepted; no transferred HTML, JSON, file or URL is executed or fetched. Both drop and click share the 40-node and single-trigger guards. Pointer-derived coordinates are rounded and clamped to 0–3000. Running locks position mutations. Drag preview never writes storage; failed/cancelled gestures preserve the saved workflow. Starting direct manipulation invalidates pending imports so an older file cannot replace newer user intent.
+
+Measured node heights use a Map because imported node IDs are arbitrary strings. Prototype-like IDs remain data and cannot alter the lookup prototype or produce inherited nonnumeric geometry. Browser regressions cover the import seam.
