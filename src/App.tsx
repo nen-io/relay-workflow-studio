@@ -100,6 +100,44 @@ export default function App() {
   const [notice, setNotice] = useState("");
   const importGeneration = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
+  const payloadInput = useRef<HTMLTextAreaElement>(null);
+  const errorSummary = useRef<HTMLDivElement>(null);
+  const reportDestination = useRef<"summary" | "input">("summary");
+  const [inputInvalid, setInputInvalid] = useState(false);
+  const [focusRequest, setFocusRequest] = useState(0);
+  const pendingInspectorFocus = useRef(false);
+  function requestInspectorFocus() {
+    pendingInspectorFocus.current = true;
+    setFocusRequest((value) => value + 1);
+  }
+  function editNode(id: string) {
+    setSelected(id);
+    requestInspectorFocus();
+  }
+  function backToWorkflow() {
+    const target = [
+      ...document.querySelectorAll<HTMLButtonElement>("[data-node-id]"),
+    ].find((item) => item.dataset.nodeId === selected);
+    (target ?? document.getElementById("workflow-name"))?.focus();
+  }
+  useEffect(() => {
+    if (!pendingInspectorFocus.current) return;
+    pendingInspectorFocus.current = false;
+    const field = document.getElementById(
+      "node-name",
+    ) as HTMLInputElement | null;
+    (field && !field.matches(":disabled")
+      ? field
+      : document.getElementById("node-inspector")
+    )?.focus();
+  }, [selected, inspectorRevision, focusRequest]);
+  useEffect(() => {
+    if (errors.length)
+      (reportDestination.current === "input"
+        ? payloadInput.current
+        : errorSummary.current
+      )?.focus();
+  }, [errors]);
   const running = run.status === "running";
   useEffect(
     () => () => {
@@ -108,7 +146,11 @@ export default function App() {
     },
     [controller],
   );
-  const report = (error: unknown) =>
+  const report = (
+    error: unknown,
+    destination: "summary" | "input" = "summary",
+  ) => {
+    reportDestination.current = destination;
     setErrors(
       error instanceof ValidationError
         ? error.issues
@@ -118,11 +160,13 @@ export default function App() {
               : "The operation could not be completed.",
           ],
     );
+  };
   function change(next: Workflow) {
     importGeneration.current++;
     dispatch({ type: "edit", workflow: next, group: editGroup.current });
     setDirty(run.status !== "idle");
     setErrors([]);
+    setInputInvalid(false);
     setNotice("");
   }
   useEffect(() => {
@@ -153,6 +197,7 @@ export default function App() {
     setInspectorRevision((value) => value + 1);
     setDirty(run.status !== "idle");
     setErrors([]);
+    setInputInvalid(false);
     setNotice(
       type === "undo"
         ? "Graph edit undone. Run captures are unchanged."
@@ -161,14 +206,23 @@ export default function App() {
   }
   function start() {
     importGeneration.current++;
+    let payload;
     try {
-      const payload = parsePayload(input);
+      payload = parsePayload(input);
+      setInputInvalid(false);
+    } catch (error) {
+      setInputInvalid(true);
+      report(error, "input");
+      return;
+    }
+    try {
       controller.start(
         workflow,
         payload,
         matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 450,
       );
       setErrors([]);
+      setInputInvalid(false);
       setDirty(false);
       setNotice("");
     } catch (error) {
@@ -183,9 +237,11 @@ export default function App() {
     setInspectorRevision((value) => value + 1);
     setCanvasRevision((value) => value + 1);
     setInput(JSON.stringify(inputs.priority, null, 2));
+    setInputInvalid(false);
     setExample("priority");
     setSelected("route");
     setErrors([]);
+    setInputInvalid(false);
     setDirty(false);
     setNotice("Example restored.");
     try {
@@ -228,6 +284,7 @@ export default function App() {
           : { ...base, type };
     change({ ...workflow, nodes: [...workflow.nodes, node] });
     setSelected(id);
+    if (!position) requestInspectorFocus();
   }
   function download() {
     try {
@@ -241,6 +298,7 @@ export default function App() {
       anchor.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       setErrors([]);
+      setInputInvalid(false);
       setNotice("Validated workflow exported.");
     } catch (error) {
       report(error);
@@ -307,6 +365,9 @@ export default function App() {
         }
       }}
     >
+      <a className="skip-link" href="#workflow-editor">
+        Skip to workflow editor
+      </a>
       <header className="topbar">
         <a className="brand" href="./" aria-label="Relay home">
           <span className="brand-mark">
@@ -368,13 +429,30 @@ export default function App() {
             </button>
           </div>
         </div>
+        <nav className="workspace-jumps" aria-label="Studio sections">
+          <a href="#workflow-editor">Workflow</a>
+          <button onClick={() => requestInspectorFocus()}>
+            Edit selected node
+          </button>
+          <a href="#run-controls">Run and trace</a>
+          <span>
+            Try the sample: run it, select a node, then change a value and run
+            again.
+          </span>
+        </nav>
         {warning && (
           <div role="status" className="banner warning">
             {warning}
           </div>
         )}
         {errors.length > 0 && (
-          <div role="alert" className="banner error">
+          <div
+            ref={errorSummary}
+            id="workflow-errors"
+            tabIndex={-1}
+            role="alert"
+            className="banner error"
+          >
             <strong>Check your workflow</strong>
             <ul>
               {errors.map((error, i) => (
@@ -453,6 +531,8 @@ export default function App() {
                     value={example}
                     onChange={(event) => {
                       setExample(event.target.value);
+                      setInputInvalid(false);
+                      setErrors([]);
                       setInput(
                         JSON.stringify(
                           inputs[event.target.value as keyof typeof inputs],
@@ -475,18 +555,27 @@ export default function App() {
                 <label className="json-label">
                   Input JSON
                   <textarea
+                    ref={payloadInput}
+                    aria-label="Input JSON"
+                    aria-invalid={inputInvalid}
+                    aria-describedby={
+                      inputInvalid
+                        ? "payload-help workflow-errors"
+                        : "payload-help"
+                    }
                     spellCheck={false}
                     value={input}
                     maxLength={MAX_BYTES}
                     onChange={(event) => {
                       setExample("custom");
+                      setInputInvalid(false);
                       setInput(event.target.value);
                       setDirty(run.status !== "idle");
                       importGeneration.current++;
                     }}
                   />
                 </label>
-                <p className="hint">
+                <p className="hint" id="payload-help">
                   A shallow JSON object. All execution stays in this browser.
                 </p>
               </div>
@@ -497,12 +586,18 @@ export default function App() {
               <small>No services. No API keys.</small>
             </div>
           </aside>
-          <section className="workbench panel" aria-label="Workflow editor">
+          <section
+            id="workflow-editor"
+            tabIndex={-1}
+            className="workbench panel"
+            aria-label="Workflow editor"
+          >
             <div className="workbench-heading">
               <div>
                 <label className="workflow-name">
                   Workflow name
                   <input
+                    id="workflow-name"
                     disabled={running}
                     value={workflow.name}
                     maxLength={160}
@@ -544,6 +639,7 @@ export default function App() {
               workflow={workflow}
               selected={selected}
               select={setSelected}
+              edit={editNode}
               run={run}
               list={list}
               add={add}
@@ -566,7 +662,13 @@ export default function App() {
               </span>
               <span>Select any node to inspect</span>
             </div>
-            <div className="run-toolbar">
+            <div
+              className="run-toolbar"
+              id="run-controls"
+              tabIndex={-1}
+              role="region"
+              aria-label="Run and trace"
+            >
               <div>
                 <span
                   className={`run-status ${run.status}`}
@@ -618,7 +720,7 @@ export default function App() {
                   {run.steps.map((step, i) => (
                     <li key={step.nodeId}>
                       <button
-                        onClick={() => setSelected(step.nodeId)}
+                        onClick={() => editNode(step.nodeId)}
                         aria-label={`Inspect step ${step.label}`}
                       >
                         <span className="trace-index">
@@ -651,6 +753,7 @@ export default function App() {
             workflow={workflow}
             step={run.steps.find((step) => step.nodeId === selected)}
             disabled={running}
+            back={backToWorkflow}
             update={(updated) =>
               change({
                 ...workflow,
@@ -660,8 +763,10 @@ export default function App() {
               })
             }
             remove={() => {
-              change(deleteNode(workflow, selected));
-              setSelected("");
+              const next = deleteNode(workflow, selected);
+              change(next);
+              setSelected(next.nodes[0]?.id ?? "");
+              requestInspectorFocus();
             }}
             connect={(target, branch) =>
               change(connect(workflow, selected, target, branch))

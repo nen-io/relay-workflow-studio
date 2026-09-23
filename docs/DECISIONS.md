@@ -76,3 +76,8 @@
 ## Reversible graph editing — September 2026
 
 Graph snapshots, rather than inverse commands, keep edge deletion and imported graph replacement atomic. Fifty memory-only snapshots bound retention; grouping by focus avoids one Undo per keystroke. Incomplete graphs remain undoable because editor state is not execution permission. Undo/redo deliberately leaves input and captured runs unchanged and conservatively marks the capture stale. Inspector drafts reset on history travel, and editable controls retain native text undo. Revisit commands or structural sharing if graph limits grow. Official references: [React state ownership](https://react.dev/learn/managing-state) and [Playwright pointer actions](https://playwright.dev/docs/input#drag-and-drop).
+
+
+## Accessibility refinement — 23 September 2026
+
+Use native controls, explicit editor entry points and associated field errors. Focus moves at intentional navigation and recovery boundaries, not every state update. The [accessibility guide](ACCESSIBILITY.md) explains the interaction model, alternatives and evidence limits. These changes leave domain validation, bounded state and local-only processing intact; they introduce no new dependencies.

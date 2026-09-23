@@ -119,7 +119,10 @@ test("failure example reports the correct node and escaped HTML is plain text", 
   await expect(page.getByRole("alert")).toContainText("must be a string");
   await page.getByLabel("Node name").fill("<img src=x onerror=alert(1)>");
   await expect(
-    page.locator(".node").filter({ hasText: "<img src=x onerror=alert(1)>" }),
+    page.getByRole("button", {
+      name: "Inspect <img src=x onerror=alert(1)>",
+      exact: true,
+    }),
   ).toBeVisible();
   expect(await page.locator(".node img").count()).toBe(0);
 });

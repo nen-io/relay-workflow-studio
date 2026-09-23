@@ -14,6 +14,8 @@ Relay is a local visual workflow studio with a real, bounded execution engine. R
 
 This is a new AI-assisted portfolio demonstration with executable verification, original synthetic examples, and explicit operating limits.
 
+**[Accessibility and keyboard guide](docs/ACCESSIBILITY.md)** — navigation, non-drag editing, error recovery and tested limits.
+
 ## Try it locally
 
 ```sh

@@ -45,3 +45,8 @@ R7 browser: real mouse movement follows the pointer, updates attached edge geome
 The graph editor provides Undo/Redo buttons and Cmd/Ctrl+Z (Shift+Z for redo) outside text/select fields. One completed pointer drag, connection change, delete with its incident edges, import, or reset is one graph edit. Continuous typing in one focused field forms one edit. No-ops, cancelled gestures and selecting a node do not consume history. A new graph edit after undo discards redo. History is memory-only, bounded to the latest 50 snapshots, and may contain incomplete graphs; only validated graphs may be persisted/exported/executed. Run captures and input JSON are separate and are never rewound. Undo/import/reset discard transient inspector drafts; history navigation fences pending imports, cancels active drag previews and is disabled during execution. Existing selection is retained when possible; otherwise the first remaining node is selected. Reload starts fresh history from the last saved valid graph.
 
 Acceptance: real pointer gesture undo/redo, grouped text, deletion plus edges, redo invalidation, reload/persistence, late-import fencing, immutable captured trace, invalid intermediate graphs and history bounds. The footer links directly to Source and a three-minute engineering walkthrough.
+
+
+## Accessibility and human usability — 23 September 2026
+
+The supported keyboard paths, error recovery, readable controls and layout states are specified in [ACCESSIBILITY.md](docs/ACCESSIBILITY.md). New browser regressions exercise these outcomes alongside existing domain and security boundaries. No remote service, data format or resource limit changes are introduced.

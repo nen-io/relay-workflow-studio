@@ -58,3 +58,8 @@ The independent populated production scan found low contrast in dimmed skipped-n
 ## Reversible graph editing — September 2026
 
 September 23 iteration: `npm run check` passed 59 unit cases; `npm run test:e2e` passed 25 Chromium journeys. New cases cover a real multi-move drag as one undo edit, grouped typing, reload, deleted edges, unchanged captured traces, redo invalidation, keyboard scope and late imports. The preexisting corrupt-storage test exposed a mount-save regression; skipping persistence until the workflow actually changes fixed it. Browser evidence is Chromium on this machine, not a physical-device or all-browser claim.
+
+
+## Accessibility and task usability — 23 September 2026
+
+`npm run check` passes strict types, 59 domain tests and production build. The full Chromium suite passes 29 journeys, including new field/error associations, keyboard entry and recovery, 320px enlarged-text/forced-colors checks and refreshed actual screenshots. See [ACCESSIBILITY.md](ACCESSIBILITY.md) for the supported interactions and limits. These are DOM/browser checks, not VoiceOver/NVDA, physical-device or formal conformance evidence.

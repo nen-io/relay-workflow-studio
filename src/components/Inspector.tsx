@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Trash2 } from "lucide-react";
 import type { Step } from "../domain/engine";
 import type { Scalar, Workflow, WorkflowNode } from "../domain/workflow";
@@ -12,6 +12,7 @@ function ScalarField({
   value: Scalar;
   commit: (value: Scalar) => void;
 }) {
+  const errorId = useId();
   const [draft, setDraft] = useState(JSON.stringify(value));
   const [error, setError] = useState("");
   useEffect(() => {
@@ -41,16 +42,21 @@ function ScalarField({
     <label>
       {label}
       <input
+        aria-label={label}
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={save}
         onKeyDown={(event) => {
-          if (event.key === "Enter") event.currentTarget.blur();
+          if (event.key === "Enter") {
+            event.preventDefault();
+            save();
+          }
         }}
         aria-invalid={!!error}
+        aria-describedby={error ? errorId : undefined}
       />
       {error && (
-        <span role="alert" className="error">
+        <span id={errorId} role="alert" className="error">
           {error}
         </span>
       )}
@@ -66,6 +72,7 @@ function PositionField({
   value: number;
   commit: (value: number) => void;
 }) {
+  const errorId = useId();
   const [draft, setDraft] = useState(String(value));
   const [error, setError] = useState("");
   useEffect(() => setDraft(String(value)), [value]);
@@ -87,6 +94,7 @@ function PositionField({
     <label>
       {axis.toUpperCase()} position
       <input
+        aria-label={`${axis.toUpperCase()} position`}
         type="number"
         min="0"
         max="3000"
@@ -94,12 +102,16 @@ function PositionField({
         onChange={(event) => setDraft(event.target.value)}
         onBlur={save}
         onKeyDown={(event) => {
-          if (event.key === "Enter") event.currentTarget.blur();
+          if (event.key === "Enter") {
+            event.preventDefault();
+            save();
+          }
         }}
         aria-invalid={!!error}
+        aria-describedby={error ? errorId : undefined}
       />
       {error && (
-        <span role="alert" className="error">
+        <span id={errorId} role="alert" className="error">
           {error}
         </span>
       )}
@@ -111,6 +123,7 @@ export function Inspector({
   workflow,
   step,
   disabled,
+  back,
   update,
   remove,
   connect,
@@ -119,13 +132,19 @@ export function Inspector({
   workflow: Workflow;
   step?: Step;
   disabled: boolean;
+  back: () => void;
   update: (node: WorkflowNode) => void;
   remove: () => void;
   connect: (target: string, branch?: "true" | "false") => void;
 }) {
   if (!node)
     return (
-      <aside className="inspector panel">
+      <aside
+        id="node-inspector"
+        tabIndex={-1}
+        className="inspector panel"
+        aria-label="Node inspector"
+      >
         <h2>Node inspector</h2>
         <p>Select a node to edit its behavior and connections.</p>
       </aside>
@@ -134,7 +153,15 @@ export function Inspector({
   const branches =
     node.type === "condition" ? (["true", "false"] as const) : [undefined];
   return (
-    <aside className="inspector panel" aria-label="Node inspector">
+    <aside
+      id="node-inspector"
+      tabIndex={-1}
+      className="inspector panel"
+      aria-label="Node inspector"
+    >
+      <button className="back-to-workflow" onClick={back}>
+        Back to workflow
+      </button>
       <div className="panel-heading">
         <span>NODE INSPECTOR</span>
         <span className="tiny-dot" />
@@ -152,6 +179,7 @@ export function Inspector({
         <label>
           Node name
           <input
+            id="node-name"
             maxLength={160}
             value={node.label}
             onChange={(event) => update({ ...node, label: event.target.value })}

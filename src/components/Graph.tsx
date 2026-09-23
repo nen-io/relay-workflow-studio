@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -46,6 +47,7 @@ export function Graph({
   workflow,
   selected,
   select,
+  edit,
   run,
   list,
   move,
@@ -55,12 +57,14 @@ export function Graph({
   workflow: Workflow;
   selected: string;
   select: (id: string) => void;
+  edit: (id: string) => void;
   run: RunState;
   list: boolean;
   move: (id: string, position: Position) => void;
   add: (type: WorkflowNode["type"], position: Position) => void;
   onEditStart: () => void;
 }) {
+  const summaryId = useId();
   const canvas = useRef<HTMLDivElement>(null);
   const gesture = useRef<Gesture | null>(null);
   const [preview, setPreview] = useState<{
@@ -229,8 +233,9 @@ export function Graph({
   return (
     <>
       <p id="canvas-help" className="canvas-help">
-        Drag nodes to arrange. Arrow keys move a focused node; Shift moves 10px.
-        Escape cancels. Drop a building block to add it.
+        Press Enter on a node to edit it. Drag nodes to arrange. Arrow keys move
+        a focused node; Shift moves 10px. Escape cancels. Drop a building block
+        to add it.
       </p>
       <div
         className={`graph ${list ? "list-mode" : ""} ${dropTarget ? "drop-target" : ""}`}
@@ -359,10 +364,12 @@ export function Graph({
                   top: node.position.y,
                   width: 220,
                 }}
-                onClick={() => select(node.id)}
+                onClick={(event) =>
+                  event.detail === 0 ? edit(node.id) : select(node.id)
+                }
                 aria-pressed={selected === node.id}
                 aria-label={`Inspect ${node.label}`}
-                aria-describedby="canvas-help"
+                aria-describedby={`canvas-help ${summaryId}-${index}`}
                 onPointerDown={(event) => begin(event, node)}
                 onPointerMove={(event) => {
                   if (gesture.current?.pointer === event.pointerId)
@@ -403,6 +410,16 @@ export function Graph({
                   );
                 }}
               >
+                <span className="sr-only" id={`${summaryId}-${index}`}>
+                  {node.type}. {status}. {description(node)}.
+                  {workflow.edges
+                    .filter((edge) => edge.source === node.id)
+                    .map(
+                      (edge) =>
+                        ` ${edge.branch ? `When ${edge.branch}` : "Next"}: ${workflow.nodes.find((target) => target.id === edge.target)?.label ?? "missing node"}.`,
+                    )
+                    .join("")}
+                </span>
                 <span className="node-top">
                   <span className="node-icon">
                     <Icon size={16} />

@@ -1119,7 +1119,140 @@ main {
   font-size: 10px;
 }
 
-.document-actions { flex-wrap: wrap; }
-.review-links { display:flex; flex-wrap:wrap; gap:16px; font-size:12px; }
-.review-links a { color:#b1bab4; text-underline-offset:4px; }
-.review-links a:focus-visible { outline:2px solid #bad7a5; outline-offset:4px; }
+.document-actions {
+  flex-wrap: wrap;
+}
+.review-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+}
+.review-links a {
+  color: #b1bab4;
+  text-underline-offset: 4px;
+}
+.review-links a:focus-visible {
+  outline: 2px solid #bad7a5;
+  outline-offset: 4px;
+}
+
+/* Practical navigation and readable controls supplement the diagram. */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 100;
+  background: #ceef86;
+  color: #101415;
+  padding: 12px 16px;
+  border-radius: 6px;
+}
+.skip-link:focus {
+  top: 12px;
+}
+.workspace-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin: 0 0 20px;
+  font-size: 13px;
+}
+.workspace-jumps a {
+  color: #ceef86;
+  padding: 9px 0;
+  text-underline-offset: 4px;
+}
+.workspace-jumps span {
+  color: #b1bab4;
+}
+#workflow-editor:focus,
+#node-inspector:focus,
+#run-controls:focus,
+#workflow-errors:focus {
+  outline: 2px solid var(--lime);
+  outline-offset: 4px;
+}
+.document-actions button,
+.run-button,
+.connection-controls label,
+.connection-controls select,
+.inspector-title p,
+.hint,
+.layout-controls,
+.delete-button,
+.trace-empty,
+.run-toolbar p,
+.canvas-help,
+.payloads pre {
+  font-size: 13px;
+}
+.workflow-meta,
+.canvas-legend {
+  font-size: 12px;
+}
+.workflow-name input {
+  min-height: 36px;
+}
+.view-toggle button {
+  min-width: 36px;
+  min-height: 36px;
+}
+.layout-controls summary {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+.back-to-workflow {
+  margin-bottom: 16px;
+  min-height: 36px;
+  font-size: 13px;
+}
+.review-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+}
+@media (pointer: coarse) {
+  button,
+  .layout-controls summary,
+  input,
+  select {
+    min-height: 44px;
+  }
+}
+@media (forced-colors: active) {
+  :focus-visible,
+  #workflow-editor:focus,
+  #node-inspector:focus,
+  #run-controls:focus,
+  #workflow-errors:focus {
+    outline: 3px solid Highlight;
+  }
+  .node {
+    border: 1px solid ButtonText;
+  }
+  .node.selected,
+  button[aria-pressed="true"] {
+    border: 3px solid Highlight;
+  }
+  .connections path {
+    stroke: CanvasText;
+  }
+  .connections .active path {
+    stroke: Highlight;
+  }
+  .connections marker path {
+    fill: CanvasText;
+  }
+}
+
+.skip-link:not(:focus) {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
