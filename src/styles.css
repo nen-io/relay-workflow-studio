@@ -1118,3 +1118,8 @@ main {
 .node-status {
   font-size: 10px;
 }
+
+.document-actions { flex-wrap: wrap; }
+.review-links { display:flex; flex-wrap:wrap; gap:16px; font-size:12px; }
+.review-links a { color:#b1bab4; text-underline-offset:4px; }
+.review-links a:focus-visible { outline:2px solid #bad7a5; outline-offset:4px; }

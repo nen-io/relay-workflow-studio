@@ -72,3 +72,8 @@ Checked 17 September 2026 while implementing the installed stack:
 ## Canvas gesture boundary
 
 `Graph` owns transient drag state and measured node heights. The workflow remains unchanged during a gesture, so engine snapshots and stored drafts never contain intermediate positions. The parent `move` callback replaces exactly one node position on release; the normal `change` function validates persistence. Beginning a gesture fences outstanding file imports. Pointer positions are calculated from the current canvas rectangle and original grab offset, so page/canvas scrolling is accounted for. A monotonically growing presentation extent prevents scrollbar clamping from changing the drag coordinate frame. Reset/import remounts the canvas and clears that presentation extent. Drag/drop uses an exact block-type allowlist and the parent's existing capacity/one-trigger guard.
+
+
+## Reversible graph editing — September 2026
+
+`historyReducer` owns the current immutable workflow plus past/future snapshots. React dispatches completed edits; pointer previews stay in Graph until release. Focus sessions supply grouping IDs for live text edits. Execution/input authority stays outside history. A workflow-change effect persists only validated graphs and skips initial restore, preserving any corruption warning.

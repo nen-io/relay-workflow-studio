@@ -38,3 +38,8 @@ Run input and workflow are cloned once at start. Edits are disabled during the r
 ## Pointer rendering budget
 
 A gesture retains one pointer record and one preview position. Node/edge DOM remains bounded by the existing 40/80 caps. Transient movement updates rendering but performs no serialization, graph persistence or engine execution; release makes one committed edit. ResizeObserver tracks at most 40 buttons and updates only when their measured heights change. Presentation extents can grow only to the bounded node coordinates plus measured label space. This is an interaction design improvement, not a measured frame-rate claim.
+
+
+## Reversible graph editing — September 2026
+
+History retains at most 50 prior/future workflow snapshots combined. Each snapshot uses the existing 40-node/80-edge editor limits; snapshots share unchanged immutable subtrees. Equality is bounded by the workflow tree and uses primitive identity (including NaN draft values), so no-op blurs do not grow history. This is a small local editor, not a collaboration log or durable audit trail.

@@ -53,3 +53,8 @@ The initial browser repro moved the mouse by 100px horizontally and 55px vertica
 Independent review also imported node IDs named `__proto__`, `constructor` and `toString`. Measured heights now use a Map; three browser regressions require finite SVG paths and zero console/page errors for these valid IDs. Resize before pointerup is fenced even if the browser has not delivered its queued resize event.
 
 The independent populated production scan found low contrast in dimmed skipped-node status and trace step indices. Skipped state now uses a distinct opaque surface and explicit status, while essential node labels and details are larger. The follow-up production scan is recorded with release evidence.
+
+
+## Reversible graph editing — September 2026
+
+September 23 iteration: `npm run check` passed 59 unit cases; `npm run test:e2e` passed 25 Chromium journeys. New cases cover a real multi-move drag as one undo edit, grouped typing, reload, deleted edges, unchanged captured traces, redo invalidation, keyboard scope and late imports. The preexisting corrupt-storage test exposed a mount-save regression; skipping persistence until the workflow actually changes fixed it. Browser evidence is Chromium on this machine, not a physical-device or all-browser claim.

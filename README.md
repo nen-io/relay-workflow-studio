@@ -10,6 +10,10 @@ Relay is a local visual workflow studio with a real, bounded execution engine. R
 
 **[Open the live demo](https://nen-io.github.io/relay-workflow-studio/)** · [CI checks](https://github.com/nen-io/relay-workflow-studio/actions)
 
+**[Three-minute engineering review](docs/REVIEWER_GUIDE.md)** — one behavior to try, one implementation boundary, and the tests that support it.
+
+This is a new AI-assisted portfolio demonstration with executable verification, original synthetic examples, and explicit operating limits.
+
 ## Try it locally
 
 ```sh

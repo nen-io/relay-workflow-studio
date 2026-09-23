@@ -13,3 +13,8 @@ Below 1220px the library and inspector stack around the workbench; below 760px t
 ## Direct manipulation refinement
 
 The graph is now a scrollable plane with one CSS pixel per saved coordinate. Node buttons retain readable widths rather than shrinking as a distant node changes the view scale. Subtle grab/grabbing cursors, selected outlines, a highlighted library drop zone and a compact instruction strip explain the interaction. Edges attach to measured button boundaries, including wrapped text. Desktop palette blocks can be dropped at a chosen location; clicking remains equally available. Tablet dragging uses the same pointer path. At phone widths, ordinary scrolling and the stacked list take priority over canvas movement.
+
+
+## Reversible graph editing — September 2026
+
+Undo and Redo sit with document actions using visible labels; the action group wraps on narrow screens. Keyboard shortcuts apply outside editable controls. Footer Source and Engineering walkthrough links make the demo-to-evidence path visible without adding tracking or an account gate.

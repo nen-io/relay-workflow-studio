@@ -43,3 +43,8 @@ Use the repository's private vulnerability reporting feature if enabled. Otherwi
 A drop is untrusted data, even with the custom MIME type. Only exact trigger/transform/condition/output strings are accepted; no transferred HTML, JSON, file or URL is executed or fetched. Both drop and click share the 40-node and single-trigger guards. Pointer-derived coordinates are rounded and clamped to 0–3000. Running locks position mutations. Drag preview never writes storage; failed/cancelled gestures preserve the saved workflow. Starting direct manipulation invalidates pending imports so an older file cannot replace newer user intent.
 
 Measured node heights use a Map because imported node IDs are arbitrary strings. Prototype-like IDs remain data and cannot alter the lookup prototype or produce inherited nonnumeric geometry. Browser regressions cover the import seam.
+
+
+## Reversible graph editing — September 2026
+
+Undo history never bypasses validation: run, export and local persistence keep their existing graph and byte boundaries. History stores only workflow data in memory, without payloads or traces, and disappears on reload. New text intent and history navigation fence asynchronous file reads. Resource links are fixed repository destinations with `rel="noreferrer"`; they carry no editor data.

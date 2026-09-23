@@ -71,3 +71,8 @@
 **Consequences.** No automatic layout, zoom or drag-to-connect is claimed. Canvas extents may retain empty space after moving inward; reset/import rebuilds them. Large graphs require scrolling. Before raising node limits, profile pointer rendering and introduce indexed edge lookup or viewport culling if needed.
 
 **References.** [MDN Pointer Events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events) explains pointer identity/capture/cancel and touch-action; [React useRef](https://react.dev/reference/react/useRef) informs transient gesture storage. Consulted 17 September 2026.
+
+
+## Reversible graph editing — September 2026
+
+Graph snapshots, rather than inverse commands, keep edge deletion and imported graph replacement atomic. Fifty memory-only snapshots bound retention; grouping by focus avoids one Undo per keystroke. Incomplete graphs remain undoable because editor state is not execution permission. Undo/redo deliberately leaves input and captured runs unchanged and conservatively marks the capture stale. Inspector drafts reset on history travel, and editable controls retain native text undo. Revisit commands or structural sharing if graph limits grow. Official references: [React state ownership](https://react.dev/learn/managing-state) and [Playwright pointer actions](https://playwright.dev/docs/input#drag-and-drop).

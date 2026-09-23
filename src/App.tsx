@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -11,6 +11,8 @@ import {
   Plus,
   Radio,
   RotateCcw,
+  Undo2,
+  Redo2,
   SlidersHorizontal,
   Square,
   Terminal,
@@ -31,6 +33,7 @@ import {
   type Workflow,
   type WorkflowNode,
 } from "./domain/workflow";
+import { historyReducer, initialHistory } from "./domain/history";
 import { restore, save } from "./domain/storage";
 function load() {
   try {
@@ -70,9 +73,22 @@ const types = [
 ] as const;
 export default function App() {
   const [initial] = useState(load);
-  const [workflow, setWorkflow] = useState(initial.workflow);
+  const [history, dispatch] = useReducer(
+    historyReducer,
+    initial.workflow,
+    initialHistory,
+  );
+  const workflow = history.current;
+  const savedWorkflow = useRef(initial.workflow);
+  const editGroup = useRef<number | null>(null);
+  const groupSequence = useRef(0);
+  const [inspectorRevision, setInspectorRevision] = useState(0);
   const [warning, setWarning] = useState(initial.warning);
-  const [selected, setSelected] = useState("route");
+  const [selected, setSelected] = useState(() =>
+    initial.workflow.nodes.some((node) => node.id === "route")
+      ? "route"
+      : (initial.workflow.nodes[0]?.id ?? ""),
+  );
   const [example, setExample] = useState("priority");
   const [input, setInput] = useState(JSON.stringify(inputs.priority, null, 2));
   const [run, setRun] = useState<RunState>({ status: "idle", steps: [] });
@@ -104,17 +120,44 @@ export default function App() {
     );
   function change(next: Workflow) {
     importGeneration.current++;
-    setWorkflow(next);
+    dispatch({ type: "edit", workflow: next, group: editGroup.current });
     setDirty(run.status !== "idle");
     setErrors([]);
     setNotice("");
+  }
+  useEffect(() => {
+    if (savedWorkflow.current === workflow) return;
+    savedWorkflow.current = workflow;
     try {
-      setWarning(save(localStorage, next));
+      setWarning(save(localStorage, workflow));
     } catch {
       setWarning(
         "Local storage is unavailable; export a valid graph to keep your changes.",
       );
     }
+    setSelected((current) =>
+      !workflow.nodes.some((node) => node.id === current)
+        ? (workflow.nodes[0]?.id ?? "")
+        : current,
+    );
+  }, [workflow]);
+  function travel(type: "undo" | "redo") {
+    if (
+      running ||
+      !(type === "undo" ? history.past.length : history.future.length)
+    )
+      return;
+    importGeneration.current++;
+    editGroup.current = null;
+    dispatch({ type });
+    setInspectorRevision((value) => value + 1);
+    setDirty(run.status !== "idle");
+    setErrors([]);
+    setNotice(
+      type === "undo"
+        ? "Graph edit undone. Run captures are unchanged."
+        : "Graph edit restored. Run captures are unchanged.",
+    );
   }
   function start() {
     importGeneration.current++;
@@ -135,7 +178,9 @@ export default function App() {
   function reset() {
     controller.reset();
     importGeneration.current++;
-    setWorkflow(structuredClone(seed));
+    editGroup.current = null;
+    dispatch({ type: "edit", workflow: structuredClone(seed), group: null });
+    setInspectorRevision((value) => value + 1);
     setCanvasRevision((value) => value + 1);
     setInput(JSON.stringify(inputs.priority, null, 2));
     setExample("priority");
@@ -210,7 +255,9 @@ export default function App() {
       const next = parseWorkflow(await file.text());
       if (generation !== importGeneration.current) return;
       controller.reset();
+      editGroup.current = null;
       change(next);
+      setInspectorRevision((value) => value + 1);
       setCanvasRevision((value) => value + 1);
       setSelected(next.nodes[0].id);
       setDirty(false);
@@ -227,7 +274,39 @@ export default function App() {
     valid = false;
   }
   return (
-    <div className="app-shell">
+    <div
+      className="app-shell"
+      onChangeCapture={(event) => {
+        if (!(
+          event.target instanceof HTMLInputElement &&
+          event.target.type === "file"
+        ))
+          importGeneration.current++;
+      }}
+      onFocusCapture={(event) => {
+        if (
+          event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement
+        )
+          editGroup.current = ++groupSequence.current;
+      }}
+      onBlurCapture={() => {
+        editGroup.current = null;
+      }}
+      onKeyDown={(event) => {
+        const target = event.target as HTMLElement;
+        if (target.closest("input, textarea, select, [contenteditable]"))
+          return;
+        if (
+          (event.metaKey || event.ctrlKey) &&
+          !event.altKey &&
+          event.key.toLowerCase() === "z"
+        ) {
+          event.preventDefault();
+          travel(event.shiftKey ? "redo" : "undo");
+        }
+      }}
+    >
       <header className="topbar">
         <a className="brand" href="./" aria-label="Relay home">
           <span className="brand-mark">
@@ -251,6 +330,22 @@ export default function App() {
             <p>Build a path. Send a payload. See every decision.</p>
           </div>
           <div className="document-actions">
+            <button
+              aria-label="Undo graph edit"
+              title="Undo graph edit (Ctrl/Cmd+Z outside text fields)"
+              disabled={running || !history.past.length}
+              onClick={() => travel("undo")}
+            >
+              <Undo2 size={15} /> Undo
+            </button>
+            <button
+              aria-label="Redo graph edit"
+              title="Redo graph edit (Ctrl/Cmd+Shift+Z outside text fields)"
+              disabled={running || !history.future.length}
+              onClick={() => travel("redo")}
+            >
+              <Redo2 size={15} /> Redo
+            </button>
             <button
               disabled={running}
               onClick={() => fileInput.current?.click()}
@@ -551,7 +646,7 @@ export default function App() {
             </div>
           </section>
           <Inspector
-            key={selected}
+            key={`${selected}:${inspectorRevision}`}
             node={node}
             workflow={workflow}
             step={run.steps.find((step) => step.nodeId === selected)}
@@ -575,7 +670,22 @@ export default function App() {
         </div>
         <footer className="footer">
           <span>RELAY / A small engine for big what-ifs.</span>
-          <span>Deterministic execution. Visible decisions.</span>
+          <nav className="review-links" aria-label="Project resources">
+            <a
+              href="https://github.com/nen-io/relay-workflow-studio"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Source
+            </a>
+            <a
+              href="https://github.com/nen-io/relay-workflow-studio/blob/main/docs/REVIEWER_GUIDE.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Engineering walkthrough
+            </a>
+          </nav>
         </footer>
       </main>
     </div>
